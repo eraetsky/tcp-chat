@@ -38,6 +38,11 @@ public:
   {
     boost::asio::post(io_context_, [this]() { socket_.close(); });
   }
+ 
+  void set_user_nickname(const std::string& s)
+  {
+    read_msg_.set_username(s);
+  }
 
 private:
   void do_connect(const tcp::resolver::results_type& endpoints)
@@ -77,6 +82,7 @@ private:
         {
           if (!ec)
           {
+            std::cout << read_msg_.get_username() << ":";
             std::cout.write(read_msg_.body(), read_msg_.body_length());
             std::cout << "\n";
             do_read_header();
@@ -109,6 +115,7 @@ private:
           }
         });
   }
+    
 
 private:
   boost::asio::io_context& io_context_;
@@ -132,6 +139,10 @@ int main(int argc, char* argv[])
     auto endpoints = resolver.resolve(argv[1], argv[2]);
     chat_client c(io_context, endpoints);
     
+    std::string user_nickname;
+    std::cout << "Enter your nickname: ";
+    std::cin  >> user_nickname;
+      
     std::thread t([&io_context](){ io_context.run(); });
 
     char line[chat_message::max_body_length + 1];
@@ -141,6 +152,7 @@ int main(int argc, char* argv[])
       msg.body_length(std::strlen(line));
       std::memcpy(msg.body(), line, msg.body_length());
       msg.encode_header();
+      c.set_user_nickname(user_nickname);
       c.write(msg);
     }
 

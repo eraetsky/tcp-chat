@@ -18,8 +18,11 @@ public:
   enum { header_length = 4 };
   enum { max_body_length = 512 };
 
-  chat_message()
-    : body_length_(0)
+  chat_message(const std::string& username)
+    : body_length_(0), username_(username)
+  {
+  }
+  chat_message() : body_length_(0)
   {
   }
 
@@ -80,9 +83,16 @@ public:
     std::memcpy(data_, header, header_length);
   }
 
+  const std::string& get_username() {return username_;}
+  void set_username(const std::string& s)
+  {
+      username_ = s;
+  }
+    
 private:
   char data_[header_length + max_body_length];
   std::size_t body_length_;
+  std::string username_;
 };
 
 
